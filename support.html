@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>支持 - 虎扑助手</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+      max-width: 640px; margin: 40px auto; padding: 0 24px;
+      color: #333; line-height: 1.8;
+    }
+    h1 { font-size: 22px; border-bottom: 2px solid #dc2626; padding-bottom: 12px; }
+    h2 { font-size: 16px; margin-top: 28px; color: #111; }
+    p, li { font-size: 14px; color: #444; }
+    ul, ol { padding-left: 20px; margin-top: 8px; }
+    li { margin-bottom: 6px; }
+    a { color: #dc2626; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .back { display: inline-block; margin-top: 32px; font-size: 13px; color: #dc2626; }
+    .faq-item { margin-bottom: 20px; }
+    .faq-item h3 { font-size: 14px; font-weight: 600; color: #222; margin-bottom: 4px; }
+    .faq-item p { font-size: 14px; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>支持</h1>
+  <p>虎扑助手 使用帮助与常见问题</p>
+
+  <h2>如何使用</h2>
+  <ol>
+    <li>打开虎扑帖子（<code>bbs.hupu.com</code>）</li>
+    <li>在帖子中的图片上 <strong>右键</strong> → <strong>保存为表情包</strong></li>
+    <li>进入评论区，点击工具栏的 <strong>表情包</strong> 按钮</li>
+    <li>在弹窗中选择一个表情，自动添加到上传队列</li>
+    <li>也可以在评论区底部 <strong>最近使用</strong> 栏直接点击上传</li>
+  </ol>
+
+  <h2>常见问题</h2>
+
+  <div class="faq-item">
+    <h3>表情保存在哪里？</h3>
+    <p>所有表情图片仅存储在您浏览器本地的 IndexedDB 中，不会上传到任何服务器。</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>右键菜单没有「保存为表情包」？</h3>
+    <p>请确保您在虎扑帖子页面（<code>bbs.hupu.com</code>）上操作。如果仍然不显示，请刷新页面或重新加载扩展。</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>上传表情后没有反应？</h3>
+    <p>请先点击评论区工具栏的「图片」按钮，确保上传入口已打开，然后再选择表情。</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>如何删除已保存的表情？</h3>
+    <p>点击浏览器工具栏的扩展图标，在 Popup 弹窗中将鼠标移到表情上，点击右上角的 ✕ 按钮即可删除。</p>
+  </div>
+
+  <div class="faq-item">
+    <h3>扩展会影响虎扑页面性能吗？</h3>
+    <p>不会。扩展仅在您主动右键保存或点击表情按钮时才会工作，不会在后台执行多余操作。</p>
+  </div>
+
+  <h2>联系开发者</h2>
+  <p>如有其他问题或建议，欢迎在 <a href="https://github.com/gamepunk/hupu-helper">GitHub</a> 提交 Issue。</p>
+
+  <a class="back" href="index.html">← 返回首页</a>
+</body>
+</html>
