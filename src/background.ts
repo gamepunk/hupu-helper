@@ -17,7 +17,7 @@ chrome.runtime.onInstalled.addListener(() => {
     id: CONTEXT_MENU_ID,
     title: "保存为表情包",
     contexts: ["image"],
-    documentUrlPatterns: ["*://*.hupu.com/*"],
+    documentUrlPatterns: ["*://bbs.hupu.com/*"],
   });
 });
 
@@ -62,7 +62,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 // ---------- 通知所有虎扑标签页刷新 ----------
 
 async function notifyEmojiChanged(): Promise<void> {
-  const tabs = await chrome.tabs.query({ url: "*://*.hupu.com/*" });
+  const tabs = await chrome.tabs.query({ url: "*://bbs.hupu.com/*" });
   for (const tab of tabs) {
     if (tab.id) {
       chrome.tabs

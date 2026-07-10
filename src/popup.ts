@@ -36,7 +36,7 @@ async function render(): Promise<void> {
       if (!id) return;
       await deleteEmoji(id);
       // 通知虎扑页面刷新
-      chrome.tabs.query({ url: "*://*.hupu.com/*" }, (tabs) => {
+      chrome.tabs.query({ url: "*://bbs.hupu.com/*" }, (tabs) => {
         tabs.forEach((tab) => {
           if (tab.id)
             chrome.tabs

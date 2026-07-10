@@ -12,7 +12,7 @@
     "128": "icons/icon128.png"
   },
   "permissions": ["storage", "contextMenus"],
-  "host_permissions": ["*://*.hupu.com/*", "*://*.hoopchina.com.cn/*"],
+  "host_permissions": ["*://bbs.hupu.com/*", "*://*.hoopchina.com.cn/*"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
@@ -31,12 +31,12 @@
   "web_accessible_resources": [
     {
       "resources": ["upload-helper.js"],
-      "matches": ["*://*.hupu.com/*"]
+      "matches": ["*://bbs.hupu.com/*"]
     }
   ],
   "content_scripts": [
     {
-      "matches": ["*://*.hupu.com/*"],
+      "matches": ["*://bbs.hupu.com/*"],
       "js": ["content.js"],
       "run_at": "document_idle"
     }
