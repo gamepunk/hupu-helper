@@ -22,14 +22,33 @@
         font-size: 16px;
         margin-top: 28px;
       }
+      .purpose {
+        background: #f5f7ff;
+        border-left: 4px solid #667eea;
+        padding: 12px 16px;
+        margin: 16px 0 24px;
+        border-radius: 0 6px 6px 0;
+      }
     </style>
   </head>
   <body>
     <h1>隐私政策</h1>
     <p>最后更新：2026 年 7 月 10 日</p>
 
+    <h2>单一用途</h2>
+    <div class="purpose">
+      <strong>虎扑助手</strong>
+      的唯一用途是：帮助用户在虎扑社区评论区快速使用表情包（贴图）进行回复。具体包含两个操作：
+      <ol>
+        <li>将虎扑帖子中的图片保存到浏览器本地，作为个人表情包收藏</li>
+        <li>将已保存的表情包快速设置到虎扑评论区的图片上传组件中</li>
+      </ol>
+    </div>
+
     <h2>1. 数据收集</h2>
-    <p>虎扑助手（以下简称"本扩展"）不会收集、存储或传输任何个人身份信息。</p>
+    <p>
+      本扩展不会收集、存储或传输任何个人身份信息。所有功能均在浏览器本地完成，无远程服务器参与。
+    </p>
 
     <h2>2. 数据存储</h2>
     <p>本扩展在您的浏览器本地存储（IndexedDB）中保存以下数据：</p>
@@ -37,7 +56,9 @@
       <li>您通过右键菜单保存的表情图片（base64 格式）</li>
       <li>最近使用的表情 ID 列表</li>
     </ul>
-    <p>所有这些数据仅存储在您的本地设备上，不会上传到任何服务器。</p>
+    <p>
+      所有这些数据仅存储在您的本地设备上，不会上传到任何服务器或与第三方共享。
+    </p>
 
     <h2>3. 网络请求</h2>
     <p>本扩展仅在以下情况下发起网络请求：</p>
@@ -52,13 +73,16 @@
       <li>
         <strong>contextMenus</strong> — 用于在图片上添加「保存为表情包」右键菜单
       </li>
-      <li><strong>host_permissions</strong> — 仅用于访问虎扑网站</li>
+      <li>
+        <strong>host_permissions</strong> —
+        仅用于访问虎扑网站（*.hupu.com、*.hoopchina.com.cn）
+      </li>
     </ul>
 
     <h2>5. 第三方共享</h2>
     <p>本扩展不会与任何第三方共享您的数据。</p>
 
     <h2>6. 联系我们</h2>
-    <p>如有任何隐私相关问题，可通过 Chrome 商店联系开发者。</p>
+    <p>如有任何隐私相关问题，可通过 Chrome 网上应用店联系开发者。</p>
   </body>
 </html>
