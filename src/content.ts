@@ -77,15 +77,14 @@ async function handleSaveImage(imageUrl: string): Promise<void> {
       },
       (response) => {
         if (response?.success) {
-          showToast("✅ 表情包已保存！", "success");
+          console.log("[Hupu Helper] 表情包已保存");
         } else {
-          showToast("❌ 保存失败", "error");
+          console.error("[Hupu Helper] 保存失败");
         }
       },
     );
   } catch (err) {
     console.error("[Hupu Helper] Save image error:", err);
-    showToast("❌ 保存失败: " + (err as Error).message, "error");
   }
 }
 
@@ -396,9 +395,7 @@ function renderPicker(
   const picker = document.createElement("div");
   picker.id = PICKER_CONTAINER_ID;
 
-  // 已按保存时间倒序（最新在前）
-  const sorted = emojis;
-  const count = sorted.length;
+  const count = emojis.length;
   const hasRecent = recentIds.length > 0;
 
   // 头部：标题 + 关闭
@@ -431,15 +428,15 @@ function renderPicker(
     `;
   } else {
     const recentLabel = hasRecent
-      ? `<div style="font-size:11px;color:#bbb;padding:2px 12px 4px;">最近使用 ${recentIds.filter((rid) => sorted.some((s) => s.meta.id === rid)).length}</div>
+      ? `<div style="font-size:11px;color:#bbb;padding:2px 12px 4px;">最近使用 ${recentIds.filter((rid) => emojis.some((s) => s.meta.id === rid)).length}</div>
          <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:6px;padding:0 12px 8px;">
          ${(() => {
            const cols = 10;
            const validRecent = recentIds.filter((rid) =>
-             sorted.some((s) => s.meta.id === rid),
+             emojis.some((s) => s.meta.id === rid),
            );
            const items = validRecent.map((rid) => {
-             const e = sorted.find((s) => s.meta.id === rid);
+             const e = emojis.find((s) => s.meta.id === rid);
              return e
                ? `<div class="hupu-picker-emoji" data-id="${e.meta.id}"
                      style="width:36px;height:36px;border-radius:0;overflow:hidden;cursor:pointer;background:#f7f7f7;border:1px solid #e8e8e8;position:relative;transition:transform 0.12s;">
@@ -456,7 +453,7 @@ function renderPicker(
            return items.join("");
          })()}
          </div>
-         <div style="font-size:11px;color:#e0e0e0;border-top:1px solid #f0f0f0;padding:6px 12px 2px;">所有表情 ${sorted.length}</div>`
+         <div style="font-size:11px;color:#e0e0e0;border-top:1px solid #f0f0f0;padding:6px 12px 2px;">所有表情 ${emojis.length}</div>`
       : "";
 
     body =
@@ -468,7 +465,7 @@ function renderPicker(
       ">
         ${(() => {
           const cols = 10;
-          const items = sorted.map(
+          const items = emojis.map(
             (e) => `
           <div class="hupu-picker-emoji" data-id="${e.meta.id}"
             style="
@@ -484,7 +481,7 @@ function renderPicker(
           </div>
         `,
           );
-          const empty = cols - (sorted.length % cols || cols);
+          const empty = cols - (emojis.length % cols || cols);
           for (let i = 0; i < empty; i++) {
             items.push(
               `<div style="width:36px;height:36px;border-radius:0;background:transparent;"></div>`,
@@ -586,8 +583,6 @@ function renderPicker(
 
 /** 将保存的表情上传至虎扑 */
 async function uploadEmojiToHupu(emoji: EmojiImageData): Promise<void> {
-  showToast("⏫ 正在上传表情...", "info");
-
   try {
     // 转换 data URL 为 File
     const file = dataURLToFile(emoji.dataUrl, `emoji_${emoji.meta.id}.png`);
@@ -596,7 +591,6 @@ async function uploadEmojiToHupu(emoji: EmojiImageData): Promise<void> {
     const fileInput = detectedFileInput || findHupuFileInput();
 
     if (!fileInput) {
-      showToast("❌ 请先点击评论区「图片」按钮打开上传入口", "error");
       return;
     }
 
@@ -605,12 +599,9 @@ async function uploadEmojiToHupu(emoji: EmojiImageData): Promise<void> {
     if (!success) {
       // 如果直接设置失败，尝试注入脚本方式
       await injectFileViaScript(file);
-    } else {
-      showToast("✅ 表情已添加到上传队列！", "success");
     }
   } catch (err) {
     console.error("[Hupu Helper] Upload error:", err);
-    showToast("❌ 上传失败: " + (err as Error).message, "error");
   }
 }
 
@@ -678,10 +669,8 @@ function injectFileViaScript(file: File): Promise<void> {
         const detail = (e as CustomEvent).detail;
         document.removeEventListener("hupu-helper:upload-result", onResult);
         if (detail.success) {
-          showToast("✅ 表情已添加到上传队列！", "success");
           resolve();
         } else {
-          showToast("❌ 上传失败，请手动点击图片上传按钮", "error");
           reject(new Error(detail.error));
         }
       };
@@ -775,71 +764,6 @@ function refreshRecentRow(): void {
   if (oldBtn) oldBtn.remove();
   recentRowInjecting = false;
   injectToolbarEmojiButton();
-}
-
-// ============================================================
-//  Toast 通知
-// ============================================================
-
-let toastEl: HTMLDivElement | null = null;
-let toastTimer: ReturnType<typeof setTimeout> | null = null;
-
-function showToast(
-  message: string,
-  type: "success" | "error" | "info" = "info",
-): void {
-  const colors = {
-    success: "#52c41a",
-    error: "#ff4d4f",
-    info: "#1677ff",
-  };
-
-  if (!toastEl) {
-    toastEl = document.createElement("div");
-    toastEl.id = "hupu-helper-toast";
-    document.body.appendChild(toastEl);
-  }
-
-  toastEl.textContent = message;
-  toastEl.setAttribute(
-    "style",
-    `
-    position:fixed !important;
-    bottom:24px !important;
-    left:50% !important;
-    transform:translateX(-50%) translateY(80px) !important;
-    z-index:9999999 !important;
-    padding:10px 20px !important;
-    border-radius:10px !important;
-    background:${colors[type]} !important;
-    color:#fff !important;
-    font-size:14px !important;
-    font-weight:500 !important;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif !important;
-    box-shadow:0 4px 12px rgba(0,0,0,0.15) !important;
-    opacity:0 !important;
-    transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    pointer-events:none !important;
-    white-space:nowrap !important;
-    max-width:90vw !important;
-  `,
-  );
-
-  // 触发动画
-  requestAnimationFrame(() => {
-    if (toastEl) {
-      toastEl.style.opacity = "1";
-      toastEl.style.transform = "translateX(-50%) translateY(0)";
-    }
-  });
-
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    if (toastEl) {
-      toastEl.style.opacity = "0";
-      toastEl.style.transform = "translateX(-50%) translateY(80px)";
-    }
-  }, 2500);
 }
 
 // ============================================================

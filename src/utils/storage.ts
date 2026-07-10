@@ -130,25 +130,6 @@ export async function getAllEmojis(): Promise<EmojiImageData[]> {
   });
 }
 
-/** 根据 id 获取单个表情包 */
-export async function getEmojiById(id: string): Promise<EmojiImageData | null> {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readonly");
-    const store = tx.objectStore(STORE_NAME);
-    const request = store.get(id);
-
-    request.onsuccess = () => {
-      resolve(
-        request.result ? fromStored(request.result as StoredEmoji) : null,
-      );
-    };
-    request.onerror = () => reject(request.error);
-
-    tx.oncomplete = () => db.close();
-  });
-}
-
 /** 保存一个新表情包（已存在相同 sourceUrl 则跳过） */
 export async function saveEmoji(
   sourceUrl: string,
@@ -220,19 +201,6 @@ export async function updateEmojiName(id: string, name: string): Promise<void> {
 
     tx.oncomplete = () => db.close();
   });
-}
-
-/** 获取存储用量信息 */
-export async function getStorageInfo(): Promise<{
-  count: number;
-  totalBytes: number;
-}> {
-  const list = await getAllEmojis();
-  const totalBytes = list.reduce(
-    (acc, e) => acc + new TextEncoder().encode(e.dataUrl).length,
-    0,
-  );
-  return { count: list.length, totalBytes };
 }
 
 // ---------- 最近使用 ----------

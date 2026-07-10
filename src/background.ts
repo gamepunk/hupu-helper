@@ -4,7 +4,6 @@ import {
   saveEmoji,
   deleteEmoji,
   getAllEmojis,
-  updateEmojiName,
   saveRecentEmoji,
   getRecentEmojiIds,
 } from "./utils/storage";
@@ -25,15 +24,38 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== CONTEXT_MENU_ID || !info.srcUrl || !tab?.id) return;
 
+  const imageUrl = info.srcUrl;
+
+  // 优先发送给 content script（可读取页面标题等信息）
   try {
-    // 从 background 中无法直接 fetch blob（需要 host_permissions）
-    // 改为发送消息给 content script，由 content script 完成抓取和保存
     await chrome.tabs.sendMessage(tab.id, {
       type: "SAVE_IMAGE_EMOJI",
-      imageUrl: info.srcUrl,
+      imageUrl,
     });
+    return;
+  } catch {
+    // content script 未加载，直接后台保存
+    console.log(
+      "[Hupu Helper] Content script not available, saving from background",
+    );
+  }
+
+  try {
+    const resp = await fetch(imageUrl);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const blob = await resp.blob();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    const pageTitle = tab.title ?? "虎扑";
+    await saveEmoji(imageUrl, dataUrl, pageTitle, "表情");
+    notifyEmojiChanged();
   } catch (err) {
-    console.error("[Hupu Helper] Failed to send save message:", err);
+    console.error("[Hupu Helper] Failed to save image:", err);
   }
 });
 
@@ -87,16 +109,7 @@ chrome.runtime.onMessage.addListener(
           sendResponse({ success: true });
           break;
         }
-        case "UPDATE_EMOJI_NAME": {
-          const { id, name } = message as {
-            type: string;
-            id: string;
-            name: string;
-          };
-          await updateEmojiName(id, name);
-          sendResponse({ success: true });
-          break;
-        }
+
         case "SAVE_RECENT_EMOJI": {
           const { id } = message as { type: string; id: string };
           await saveRecentEmoji(id);
