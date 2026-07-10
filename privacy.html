@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>隐私政策 - 虎扑助手</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue",
+          sans-serif;
+        max-width: 720px;
+        margin: 40px auto;
+        padding: 0 24px;
+        color: #333;
+        line-height: 1.8;
+      }
+      h1 {
+        font-size: 22px;
+        border-bottom: 2px solid #dc2626;
+        padding-bottom: 12px;
+      }
+      h2 {
+        font-size: 16px;
+        margin-top: 28px;
+        color: #111;
+      }
+      p,
+      li {
+        font-size: 14px;
+        color: #444;
+      }
+      ul {
+        padding-left: 20px;
+        margin-top: 8px;
+      }
+      li {
+        margin-bottom: 4px;
+      }
+      .back {
+        display: inline-block;
+        margin-top: 32px;
+        font-size: 13px;
+        color: #dc2626;
+        text-decoration: none;
+      }
+      .back:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>隐私政策</h1>
+    <p>最后更新：2026 年 7 月 11 日</p>
+
+    <h2>单一用途</h2>
+    <p>
+      <strong>虎扑助手</strong>
+      的唯一用途是：帮助用户在虎扑社区评论区快速使用表情包（贴图）进行回复。具体包含两个操作：
+    </p>
+    <ol>
+      <li>将虎扑帖子中的图片保存到浏览器本地，作为个人表情包收藏</li>
+      <li>将已保存的表情包快速设置到虎扑评论区的图片上传组件中</li>
+    </ol>
+
+    <h2>数据收集</h2>
+    <p>
+      本扩展<strong>不会收集、存储或传输任何个人身份信息</strong>。所有功能均在浏览器本地完成，无远程服务器参与。
+    </p>
+
+    <h2>数据存储</h2>
+    <p>本扩展在您的浏览器本地（IndexedDB）中保存以下数据：</p>
+    <ul>
+      <li>您通过右键菜单保存的表情图片（base64 格式）</li>
+      <li>最近使用的表情 ID 列表</li>
+    </ul>
+    <p>
+      所有这些数据仅存储在您的本地设备上，不会上传到任何服务器或与第三方共享。
+    </p>
+
+    <h2>网络请求</h2>
+    <p>本扩展仅在以下情况下发起网络请求：</p>
+    <ul>
+      <li>从虎扑页面下载您选择的图片（用于保存为表情包）</li>
+      <li>将表情文件设置到虎扑的上传组件（用于评论中上传表情）</li>
+    </ul>
+
+    <h2>权限说明</h2>
+    <ul>
+      <li><strong>storage</strong> — 用于在本地保存您的表情数据</li>
+      <li>
+        <strong>contextMenus</strong> — 用于在图片上添加「保存为表情包」右键菜单
+      </li>
+      <li>
+        <strong>host_permissions</strong> —
+        仅用于访问虎扑评论区（bbs.hupu.com）及图片 CDN（hoopchina.com.cn）
+      </li>
+    </ul>
+
+    <h2>第三方共享</h2>
+    <p>本扩展不会与任何第三方共享您的数据。</p>
+
+    <h2>联系我们</h2>
+    <p>
+      如有任何隐私相关问题，可通过
+      <a href="https://github.com/gamepunk/hupu-helper">GitHub</a> 联系开发者。
+    </p>
+
+    <a class="back" href="index.html">← 返回首页</a>
+  </body>
+</html>
