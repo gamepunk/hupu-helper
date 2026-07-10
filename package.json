@@ -1,0 +1,22 @@
+{
+  "name": "hupu-helper",
+  "version": "1.0.0",
+  "description": "JRs专属斗图神器，一键快速插入表情包！",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run build:watch",
+    "build": "bun run build:clean && bun run build:popup && bun run build:content && bun run build:background && bun run build:copy",
+    "build:popup": "bun build ./src/popup.ts --outdir ./dist --target browser",
+    "build:content": "bun build ./src/content.ts --outdir ./dist --target browser",
+    "build:background": "bun build ./src/background.ts --outdir ./dist --target browser",
+    "build:copy": "cp ./src/manifest.json ./dist/ && cp ./src/popup.html ./dist/ && cp ./src/upload-helper.js ./dist/ && cp -R ./src/icons ./dist/",
+    "build:clean": "rm -rf ./dist && mkdir -p ./dist",
+    "build:watch": "bun build ./src/popup.ts ./src/content.ts ./src/background.ts --outdir ./dist --target browser --watch",
+    "typecheck": "tsc --noEmit",
+    "zip": "bun run build && cd dist && zip -r ../hupu-helper.zip . -x '.DS_Store'"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.287",
+    "typescript": "^5.7.0"
+  }
+}
