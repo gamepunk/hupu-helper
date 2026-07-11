@@ -2,8 +2,8 @@
 // 此脚本运行在页面上下文中，用于操作虎扑的 file input
 // 通过 CustomEvent 与 content script 通信
 
-window.addEventListener("hupu-helper:upload-file", async (e) => {
-  const { dataUrl, fileName } = e.detail;
+window.addEventListener("hupu-helper:upload-file", async (e: Event) => {
+  const { dataUrl, fileName } = (e as CustomEvent).detail;
 
   try {
     const resp = await fetch(dataUrl);
@@ -11,10 +11,11 @@ window.addEventListener("hupu-helper:upload-file", async (e) => {
     const file = new File([blob], fileName || "emoji.png", { type: blob.type });
 
     // 查找文件输入
-    const inputs = document.querySelectorAll('input[type="file"]');
-    let target = null;
+    const inputs =
+      document.querySelectorAll<HTMLInputElement>('input[type="file"]');
+    let target: HTMLInputElement | null = null;
     for (const inp of inputs) {
-      if (inp.accept && inp.accept.toLowerCase().includes("image")) {
+      if (inp.accept?.toLowerCase().includes("image")) {
         target = inp;
         break;
       }
@@ -55,10 +56,10 @@ window.addEventListener("hupu-helper:upload-file", async (e) => {
         }),
       );
     }
-  } catch (err) {
+  } catch {
     window.dispatchEvent(
       new CustomEvent("hupu-helper:upload-result", {
-        detail: { success: false, error: String(err) },
+        detail: { success: false, error: "upload failed" },
       }),
     );
   }
