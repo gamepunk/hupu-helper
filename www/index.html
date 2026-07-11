@@ -42,7 +42,12 @@
 
       /* Hero */
       .hero {
-        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+        background: linear-gradient(
+          135deg,
+          #dc2626 0%,
+          #b91c1c 50%,
+          #991b1b 100%
+        );
         color: #fff;
         text-align: center;
         padding: 64px 24px 56px;
@@ -56,8 +61,17 @@
         left: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.06) 0%, transparent 50%),
-                    radial-gradient(circle at 70% 50%, rgba(255,255,255,0.04) 0%, transparent 50%);
+        background:
+          radial-gradient(
+            circle at 30% 50%,
+            rgba(255, 255, 255, 0.06) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 70% 50%,
+            rgba(255, 255, 255, 0.04) 0%,
+            transparent 50%
+          );
         pointer-events: none;
       }
       .hero img {
@@ -73,6 +87,19 @@
         font-weight: 800;
         letter-spacing: -0.5px;
         position: relative;
+      }
+      .hero h1 .version {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.15);
+        color: rgba(255, 255, 255, 0.7);
+        padding: 2px 8px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        vertical-align: middle;
+        margin-left: 8px;
+        position: relative;
+        top: -2px;
       }
       .hero p {
         font-size: 16px;
@@ -96,7 +123,9 @@
         font-size: 15px;
         font-weight: 600;
         position: relative;
-        transition: transform 0.15s, box-shadow 0.15s;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s;
       }
       .hero .badge:hover {
         transform: translateY(-2px);
@@ -105,17 +134,6 @@
       .hero .badge svg {
         width: 18px;
         height: 18px;
-      }
-      .hero .version {
-        display: inline-block;
-        margin-top: 14px;
-        background: rgba(255, 255, 255, 0.12);
-        color: rgba(255, 255, 255, 0.7);
-        padding: 3px 10px;
-        border-radius: 10px;
-        font-size: 11px;
-        font-weight: 500;
-        position: relative;
       }
 
       .container {
@@ -151,7 +169,10 @@
         border-radius: 14px;
         padding: 24px 24px 28px;
         border: 1px solid #eee;
-        transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s,
+          transform 0.2s;
       }
       .feature-card:hover {
         border-color: #ddd;
@@ -195,11 +216,13 @@
         border-radius: 14px;
         border: 1px solid #eee;
         background: #fafafa;
-        transition: border-color 0.2s, box-shadow 0.2s;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
       }
       .step-card:hover {
         border-color: #ddd;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
       }
       .step-card .num {
         width: 36px;
@@ -272,10 +295,19 @@
       }
 
       @media (max-width: 600px) {
-        .hero h1 { font-size: 28px; }
-        .features-grid { grid-template-columns: 1fr; }
-        .steps { flex-direction: column; align-items: center; }
-        .step-arrow { transform: rotate(90deg); }
+        .hero h1 {
+          font-size: 28px;
+        }
+        .features-grid {
+          grid-template-columns: 1fr;
+        }
+        .steps {
+          flex-direction: column;
+          align-items: center;
+        }
+        .step-arrow {
+          transform: rotate(90deg);
+        }
       }
     </style>
   </head>
@@ -286,16 +318,19 @@
         src="https://github.com/gamepunk/hupu-helper/raw/main/src/icons/icon128.png"
         alt="虎扑助手"
       />
-      <h1>虎扑助手</h1>
+      <h1>虎扑助手 <span class="version">v1.0.1</span></h1>
       <p>全网表情包收藏工具 — 任意网站图片一键保存，虎扑评论区快速上传</p>
       <a
         class="badge"
         href="https://chrome.google.com/webstore/detail/hupu-helper"
       >
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"
+          />
+        </svg>
         从 Chrome 网上应用店安装
       </a>
-      <span class="version">v1.0.1</span>
     </div>
 
     <div class="container">
@@ -343,17 +378,17 @@
         <div class="steps">
           <div class="step-card">
             <div class="num">1</div>
-            <p>看到喜欢的图片<br/>右键「保存为表情包」</p>
+            <p>看到喜欢的图片<br />右键「保存为表情包」</p>
           </div>
           <div class="step-arrow">→</div>
           <div class="step-card">
             <div class="num">2</div>
-            <p>进入评论区<br/>点击「表情包」按钮</p>
+            <p>进入评论区<br />点击「表情包」按钮</p>
           </div>
           <div class="step-arrow">→</div>
           <div class="step-card">
             <div class="num">3</div>
-            <p>选择一个表情<br/>自动添加到上传队列</p>
+            <p>选择一个表情<br />自动添加到上传队列</p>
           </div>
         </div>
       </div>
