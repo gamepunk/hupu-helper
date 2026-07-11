@@ -1,6 +1,6 @@
 {
   "name": "hupu-helper",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "JRs专属斗图神器，一键快速插入表情包！",
   "type": "module",
   "scripts": {
