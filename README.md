@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://chrome.google.com/webstore/detail/hupu-helper">
+  <a href="https://chromewebstore.google.com/detail/%E8%99%8E%E6%89%91%E5%8A%A9%E6%89%8B/bjgaeebghplcggljifepfbobhijmajgn">
     <img src="https://img.shields.io/badge/Chrome%20Web%20Store-立即安装-4285F4?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store" />
   </a>
   <a href="https://github.com/gamepunk/hupu-helper/releases">
