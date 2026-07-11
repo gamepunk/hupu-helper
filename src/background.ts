@@ -18,11 +18,6 @@ chrome.runtime.onInstalled.addListener(() => {
       id: CONTEXT_MENU_ID,
       title: "保存为表情包",
       contexts: ["image"],
-      documentUrlPatterns: [
-        "*://bbs.hupu.com/*",
-        "*://*.bbsactivity.hupu.com/*",
-        "*://m.hupu.com/*",
-      ],
     });
   });
 });
