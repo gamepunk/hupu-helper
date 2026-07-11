@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/Chrome%20Web%20Store-立即安装-4285F4?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store" />
   </a>
   <a href="https://github.com/gamepunk/hupu-helper/releases">
-    <img src="https://img.shields.io/github/v/release/gamepunk/hupu-helper?style=flat-square&color=dc2626" alt="Version" />
+    <img src="https://img.shields.io/github/v/release/gamepunk/hupu-helper?style=flat-square&color=dc2626&label=Release" alt="Release" />
   </a>
   <a href="https://github.com/gamepunk/hupu-helper/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/许可-MIT-3da639?style=flat-square" alt="MIT License" />
