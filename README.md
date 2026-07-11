@@ -1,6 +1,31 @@
 # 虎扑助手
 
-全网表情包收藏工具 — 在任何网站的图片上右键保存为表情包，在虎扑评论区快速上传使用。
+<p align="center">
+  <img src="https://github.com/gamepunk/hupu-helper/raw/main/src/icons/icon128.png" width="96" height="96" alt="虎扑助手" style="border-radius:20px;" />
+</p>
+
+<p align="center">
+  <a href="https://chrome.google.com/webstore/detail/hupu-helper">
+    <img src="https://img.shields.io/badge/Chrome%20Web%20Store-立即安装-4285F4?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store" />
+  </a>
+  <a href="https://github.com/gamepunk/hupu-helper/releases">
+    <img src="https://img.shields.io/github/v/release/gamepunk/hupu-helper?style=flat-square&color=dc2626&label=版本" alt="Version" />
+  </a>
+  <a href="https://github.com/gamepunk/hupu-helper/blob/main/LICENSE">
+    <img src="https://img.shields.io/badge/许可-MIT-3da639?style=flat-square" alt="MIT License" />
+  </a>
+  <a href="https://github.com/gamepunk/hupu-helper/actions">
+    <img src="https://img.shields.io/badge/构建-passing-brightgreen?style=flat-square" alt="Build" />
+  </a>
+  <a href="https://bun.sh">
+    <img src="https://img.shields.io/badge/Bun-v1.3-000000?style=flat-square&logo=bun&logoColor=white" alt="Bun" />
+  </a>
+  <a href="https://www.typescriptlang.org/">
+    <img src="https://img.shields.io/badge/TypeScript-v5.7-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+  </a>
+</p>
+
+<p align="center">全网表情包收藏工具 — 在任何网站的图片上右键保存为表情包，在虎扑评论区快速上传使用。</p>
 
 ## 功能
 
@@ -15,8 +40,6 @@
 ## 安装
 
 ### Chrome 网上应用店
-
-[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-立即安装-4285F4?logo=googlechrome&logoColor=white)](https://chrome.google.com/webstore/detail/hupu-helper)
 
 ### 开发者模式加载
 
@@ -37,11 +60,11 @@ bun run build
 
 ## 使用指南
 
-1. 在**任意网站**上看到喜欢的图片 → **右键** → **保存为表情包**
-2. 打开虎扑帖子，进入评论区
-3. 点击工具栏的 **表情包** 按钮 → 选择表情 → 自动上传
-4. 也可以在评论区底部的 **最近使用** 栏直接点击上传
-5. 点击扩展图标 → Popup 弹窗管理所有收藏的表情
+1. 🌐 在**任意网站**上看到喜欢的图片 → **右键** → **保存为表情包**
+2. 🏠 打开虎扑帖子，进入评论区
+3. 😜 点击工具栏的 **表情包** 按钮 → 选择表情 → 自动上传
+4. ⏱ 也可以在评论区底部的 **最近使用** 栏直接点击上传
+5. 📦 点击扩展图标 → Popup 弹窗管理所有收藏的表情
 
 ## 隐私
 
@@ -85,7 +108,7 @@ bun run zip
 
 ### v1.0.1
 
-- 🌐 **全网收藏**：右键菜单已不限域名，任意网站图片都可保存为表情包
+- 🌐 全网收藏：右键菜单已不限域名，任意网站图片都可保存为表情包
 - 🎨 Popup 页面白底改版，表情网格布局优化
 - 🗑️ 删除按钮改为右上角 SVG 垃圾桶图标，悬停显示
 - 👆 点击表情图片跳转到原始来源页面
