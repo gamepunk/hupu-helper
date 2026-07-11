@@ -508,27 +508,12 @@ function renderPicker(
     animation:hupuPickerIn 0.15s ease !important;
   `;
 
-  // 气泡箭头（用纯 CSS 三角形，指向按钮方向）
-  const arrow = document.createElement("div");
-  arrow.style.cssText = `
-    position:fixed !important;
-    z-index:999999 !important;
-    width:0 !important;height:0 !important;
-    border-left:7px solid transparent !important;
-    border-right:7px solid transparent !important;
-    border-top:7px solid #fff !important;
-    pointer-events:none !important;
-  `;
-  arrow.id = "hupu-picker-arrow";
-
   // 定位：按钮正上方弹出
   const toolbarBtn = document.querySelector(`.${PICKER_BTN_CLASS}`);
   if (toolbarBtn) {
     const rect = toolbarBtn.getBoundingClientRect();
     const pickerW = 440;
-    const arrowH = 7; // 箭头高度
 
-    // picker 水平居中于按钮
     let left = Math.max(
       4,
       Math.min(
@@ -536,28 +521,18 @@ function renderPicker(
         window.innerWidth - pickerW - 4,
       ),
     );
-    const pickerBottom = window.innerHeight - rect.top + arrowH + 4;
     picker.style.left = `${left}px`;
-    picker.style.bottom = `${pickerBottom}px`;
-
-    // 箭头在按钮正上方（指向按钮）
-    const arrowLeft = rect.left + rect.width / 2 - 7;
-    arrow.style.left = `${Math.max(10, Math.min(arrowLeft, window.innerWidth - 20))}px`;
-    arrow.style.bottom = `${window.innerHeight - rect.top - 2}px`;
+    picker.style.bottom = `${window.innerHeight - rect.top + 4}px`;
   } else {
     picker.style.right = "12px";
     picker.style.bottom = "120px";
-    arrow.style.display = "none";
   }
 
   document.body.appendChild(picker);
-  document.body.appendChild(arrow);
 
   // 关闭
   const removePicker = () => {
     picker.remove();
-    const arr = document.getElementById("hupu-picker-arrow");
-    if (arr) arr.remove();
   };
 
   picker
@@ -791,8 +766,6 @@ function refreshRecentRow(): void {
       getRecentIdsFromBackground(),
     ]).then(([emojis, recentIds]) => {
       picker.remove();
-      const arr = document.getElementById("hupu-picker-arrow");
-      if (arr) arr.remove();
       renderPicker(emojis, recentIds);
     });
   }
