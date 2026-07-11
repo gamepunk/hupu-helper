@@ -18,10 +18,10 @@
     <img src="https://img.shields.io/badge/构建-passing-brightgreen?style=flat-square&label=构建" alt="Build" />
   </a>
   <a href="https://bun.sh">
-    <img src="https://img.shields.io/badge/Bun-v1.3-000000?style=flat-square&logo=bun&logoColor=white&label=运行时" alt="Bun" />
+    <img src="https://img.shields.io/badge/Bun-v1.3-000000?style=flat-square&logo=bun&logoColor=white" alt="Bun" />
   </a>
   <a href="https://www.typescriptlang.org/">
-    <img src="https://img.shields.io/badge/TypeScript-v5.7-3178C6?style=flat-square&logo=typescript&logoColor=white&label=语言" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/TypeScript-v5.7-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
   </a>
 </p>
 
