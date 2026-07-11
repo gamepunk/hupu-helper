@@ -44,6 +44,12 @@
     .hero .badge:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
     .hero .sub-link { display: block; margin-top: 12px; color: rgba(255,255,255,0.6); font-size: 13px; }
     .hero .sub-link a { color: rgba(255,255,255,0.8); }
+    .hero .version {
+      display: inline-block; margin-top: 10px;
+      background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7);
+      padding: 3px 10px; border-radius: 10px;
+      font-size: 11px; font-weight: 500;
+    }
 
     .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
 
@@ -108,6 +114,7 @@
     <h1>虎扑助手</h1>
     <p>一键保存帖子中的图片为表情包，快速上传到评论区</p>
     <a class="badge" href="https://chrome.google.com/webstore/detail/hupu-helper">从 Chrome 网上应用店安装</a>
+    <span class="version">v1.0.1</span>
   </div>
 
   <div class="container">
@@ -134,7 +141,12 @@
         <div class="feature-card">
           <span class="icon">📦</span>
           <h3>表情管理</h3>
-          <p>点击扩展图标，在 Popup 弹窗中查看所有已保存的表情包，支持删除</p>
+          <p>点击扩展图标，在 Popup 弹窗中查看/删除表情，支持导入导出备份</p>
+        </div>
+        <div class="feature-card">
+          <span class="icon">🗑️</span>
+          <h3>悬停删除</h3>
+          <p>Pop 页面鼠标悬停图片显示垃圾桶图标，点击即可删除，点击图片跳转来源</p>
         </div>
       </div>
     </div>
@@ -181,7 +193,4 @@
   </div>
 
 </body>
-</html>
-    </div>
-  </body>
 </html>
