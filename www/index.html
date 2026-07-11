@@ -14,7 +14,12 @@
       property="og:image"
       content="https://github.com/gamepunk/hupu-helper/raw/main/src/icons/icon128.png"
     />
-    <link rel="icon" type="image/png" sizes="32x32" href="https://github.com/gamepunk/hupu-helper/raw/main/src/icons/icon32.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="https://github.com/gamepunk/hupu-helper/raw/main/src/icons/icon32.png"
+    />
     <meta
       name="google-site-verification"
       content="GaZiNH-djWy_3sKzd_KQeN0lT4papeIXMMd7kWXL-xE"
@@ -37,22 +42,37 @@
 
       /* Hero */
       .hero {
-        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
         color: #fff;
         text-align: center;
-        padding: 60px 24px 56px;
+        padding: 64px 24px 56px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.06) 0%, transparent 50%),
+                    radial-gradient(circle at 70% 50%, rgba(255,255,255,0.04) 0%, transparent 50%);
+        pointer-events: none;
       }
       .hero img {
         width: 88px;
         height: 88px;
-        border-radius: 20px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        border-radius: 22px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
         margin-bottom: 16px;
+        position: relative;
       }
       .hero h1 {
-        font-size: 32px;
+        font-size: 34px;
         font-weight: 800;
         letter-spacing: -0.5px;
+        position: relative;
       }
       .hero p {
         font-size: 16px;
@@ -61,43 +81,41 @@
         max-width: 480px;
         margin-left: auto;
         margin-right: auto;
+        position: relative;
       }
       .hero .badge {
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
         margin-top: 24px;
         background: #fff;
         color: #dc2626;
-        padding: 12px 32px;
+        padding: 12px 28px;
         border-radius: 8px;
         text-decoration: none;
         font-size: 15px;
         font-weight: 600;
-        transition:
-          transform 0.15s,
-          box-shadow 0.15s;
+        position: relative;
+        transition: transform 0.15s, box-shadow 0.15s;
       }
       .hero .badge:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
       }
-      .hero .sub-link {
-        display: block;
-        margin-top: 12px;
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 13px;
-      }
-      .hero .sub-link a {
-        color: rgba(255, 255, 255, 0.8);
+      .hero .badge svg {
+        width: 18px;
+        height: 18px;
       }
       .hero .version {
         display: inline-block;
-        margin-top: 10px;
-        background: rgba(255, 255, 255, 0.15);
+        margin-top: 14px;
+        background: rgba(255, 255, 255, 0.12);
         color: rgba(255, 255, 255, 0.7);
         padding: 3px 10px;
         border-radius: 10px;
         font-size: 11px;
         font-weight: 500;
+        position: relative;
       }
 
       .container {
@@ -115,6 +133,7 @@
         font-weight: 700;
         text-align: center;
         margin-bottom: 32px;
+        color: #111;
       }
       .section-divider {
         border: none;
@@ -129,44 +148,60 @@
       }
       .feature-card {
         background: #f8f9fa;
-        border-radius: 12px;
-        padding: 24px;
+        border-radius: 14px;
+        padding: 24px 24px 28px;
         border: 1px solid #eee;
-        transition: border-color 0.15s;
+        transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
       }
       .feature-card:hover {
-        border-color: #d0d0d0;
+        border-color: #ddd;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        transform: translateY(-2px);
       }
       .feature-card .icon {
-        font-size: 28px;
-        margin-bottom: 8px;
-        display: block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid #eee;
+        font-size: 20px;
+        margin-bottom: 14px;
       }
       .feature-card h3 {
         font-size: 15px;
         font-weight: 600;
         margin-bottom: 6px;
+        color: #222;
       }
       .feature-card p {
         font-size: 13px;
         color: #666;
+        line-height: 1.5;
       }
 
       /* Steps */
       .steps {
         display: flex;
-        gap: 16px;
+        gap: 12px;
         justify-content: center;
-        flex-wrap: wrap;
       }
-      .step {
+      .step-card {
         flex: 1;
-        min-width: 140px;
-        max-width: 160px;
         text-align: center;
-        padding: 20px 12px;
+        padding: 28px 16px 24px;
+        border-radius: 14px;
+        border: 1px solid #eee;
+        background: #fafafa;
+        transition: border-color 0.2s, box-shadow 0.2s;
       }
-      .step .num {
+      .step-card:hover {
+        border-color: #ddd;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      }
+      .step-card .num {
         width: 36px;
         height: 36px;
         line-height: 36px;
@@ -175,74 +210,91 @@
         color: #fff;
         font-size: 14px;
         font-weight: 700;
-        margin: 0 auto 10px;
+        margin: 0 auto 12px;
       }
-      .step p {
+      .step-card p {
         font-size: 13px;
-        color: #444;
+        color: #555;
+        line-height: 1.5;
       }
-      .step .arrow {
-        font-size: 20px;
-        color: #ccc;
-        align-self: center;
+      .step-arrow {
+        display: flex;
+        align-items: center;
+        color: #d0d0d0;
+        font-size: 22px;
+        font-weight: 300;
+        flex-shrink: 0;
       }
 
       /* Privacy */
       .privacy-box {
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 24px;
+        background: linear-gradient(135deg, #f8f9fa, #fff);
+        border-radius: 14px;
+        padding: 28px 24px;
         border: 1px solid #eee;
         text-align: center;
       }
       .privacy-box p {
         font-size: 14px;
         color: #555;
+        line-height: 1.7;
+      }
+      .privacy-box strong {
+        color: #dc2626;
       }
 
       /* Footer */
       .footer {
         text-align: center;
-        padding: 32px 0;
+        padding: 32px 0 40px;
         color: #999;
         font-size: 13px;
+        border-top: 1px solid #f0f0f0;
+        margin-top: 16px;
       }
       .footer a {
         color: #666;
         text-decoration: none;
+        transition: color 0.15s;
       }
       .footer a:hover {
-        text-decoration: underline;
+        color: #dc2626;
+        text-decoration: none;
       }
-      .footer .github-star {
-        margin-top: 12px;
+      .footer .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-bottom: 8px;
+      }
+      .footer .footer-links a {
+        font-size: 13px;
       }
 
-      @media (max-width: 520px) {
-        .features-grid {
-          grid-template-columns: 1fr;
-        }
-        .steps {
-          flex-direction: column;
-          align-items: center;
-        }
-        .step {
-          max-width: 100%;
-        }
+      @media (max-width: 600px) {
+        .hero h1 { font-size: 28px; }
+        .features-grid { grid-template-columns: 1fr; }
+        .steps { flex-direction: column; align-items: center; }
+        .step-arrow { transform: rotate(90deg); }
       }
     </style>
   </head>
   <body>
     <!-- Hero -->
     <div class="hero">
-      <img src="https://github.com/gamepunk/hupu-helper/raw/main/src/icons/icon128.png" alt="虎扑助手" />
+      <img
+        src="https://github.com/gamepunk/hupu-helper/raw/main/src/icons/icon128.png"
+        alt="虎扑助手"
+      />
       <h1>虎扑助手</h1>
       <p>全网表情包收藏工具 — 任意网站图片一键保存，虎扑评论区快速上传</p>
       <a
         class="badge"
         href="https://chrome.google.com/webstore/detail/hupu-helper"
-        >从 Chrome 网上应用店安装</a
       >
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        从 Chrome 网上应用店安装
+      </a>
       <span class="version">v1.0.1</span>
     </div>
 
@@ -289,19 +341,19 @@
       <div class="section">
         <h2 class="section-title">使用步骤</h2>
         <div class="steps">
-          <div class="step">
+          <div class="step-card">
             <div class="num">1</div>
-            <p>看到喜欢的图片右键「保存为表情包」</p>
+            <p>看到喜欢的图片<br/>右键「保存为表情包」</p>
           </div>
-          <span class="arrow">→</span>
-          <div class="step">
+          <div class="step-arrow">→</div>
+          <div class="step-card">
             <div class="num">2</div>
-            <p>进入评论区，点击工具栏「表情包」按钮</p>
+            <p>进入评论区<br/>点击「表情包」按钮</p>
           </div>
-          <span class="arrow">→</span>
-          <div class="step">
+          <div class="step-arrow">→</div>
+          <div class="step-card">
             <div class="num">3</div>
-            <p>选择一个表情，自动添加到上传队列</p>
+            <p>选择一个表情<br/>自动添加到上传队列</p>
           </div>
         </div>
       </div>
@@ -322,10 +374,12 @@
 
     <!-- Footer -->
     <div class="footer">
-      <p>
-        <a href="support.html">支持</a> · <a href="privacy.html">隐私</a> ·
-        <a href="https://github.com/gamepunk/hupu-helper">⭐ Star on GitHub</a>
-      </p>
+      <div class="footer-links">
+        <a href="support.html">帮助</a>
+        <a href="privacy.html">隐私</a>
+        <a href="https://github.com/gamepunk/hupu-helper">GitHub</a>
+      </div>
+      <p>虎扑助手 · MIT License</p>
     </div>
   </body>
 </html>
