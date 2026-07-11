@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a href="https://chromewebstore.google.com/detail/%E8%99%8E%E6%89%91%E5%8A%A9%E6%89%8B/bjgaeebghplcggljifepfbobhijmajgn">
+  <a href="https://chrome.google.com/webstore/detail/bjgaeebghplcggljifepfbobhijmajgn">
     <img src="https://img.shields.io/badge/Chrome%20Web%20Store-立即安装-4285F4?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store" />
   </a>
   <a href="https://github.com/gamepunk/hupu-helper/releases">
@@ -40,6 +40,10 @@
 ## 安装
 
 ### Chrome 网上应用店
+
+<a href="https://chrome.google.com/webstore/detail/bjgaeebghplcggljifepfbobhijmajgn" target="_blank">
+  <img src="https://img.shields.io/badge/Chrome%20Web%20Store-立即安装-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Chrome Web Store" />
+</a>
 
 ### 开发者模式加载
 

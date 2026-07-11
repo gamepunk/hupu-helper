@@ -55,10 +55,9 @@ async function handleSaveImage(imageUrl: string): Promise<void> {
       blob = await fetchViaXHR(imageUrl);
     }
 
-    // 转 base64
+    // 转 base64 后再发送（Blob 不可跨 content script → background 传递）
     const dataUrl = await blobToDataURL(blob);
 
-    // 发送到 background 保存
     chrome.runtime.sendMessage(
       {
         type: "SAVE_MEME_DATA",
@@ -211,7 +210,7 @@ function tryInjectRecentRow(): void {
         pin.innerHTML =
           '<svg width="10" height="10" viewBox="0 0 24 24" fill="#fadb14" stroke="#fadb14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
         pin.style.cssText =
-          "position:absolute !important;top:1px !important;right:1px !important;z-index:2 !important;line-height:0 !important;pointer-events:none !important;";
+          "position:absolute !important;top:1px !important;left:1px !important;z-index:2 !important;line-height:0 !important;pointer-events:none !important;";
         item.appendChild(pin);
       }
 
@@ -477,7 +476,7 @@ function renderPicker(memes: MemeImageData[], recentIds: string[] = []): void {
             "
             title="${e.meta.pinned ? "已置顶" : ""}"
           >
-            ${e.meta.pinned ? '<svg style="position:absolute;top:1px;right:1px;z-index:1;" width="10" height="10" viewBox="0 0 24 24" fill="#fadb14" stroke="#fadb14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' : ""}
+            ${e.meta.pinned ? '<svg style="position:absolute;top:1px;left:1px;z-index:1;" width="10" height="10" viewBox="0 0 24 24" fill="#fadb14" stroke="#fadb14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' : ""}
             <img src="${e.dataUrl}" alt="" style="
               width:35px;height:35px;object-fit:cover;display:block;
             " loading="lazy" />

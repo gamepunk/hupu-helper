@@ -2,6 +2,7 @@
 
 import {
   saveMeme,
+  saveMemeFromBlob,
   deleteMeme,
   getAllMemes,
   togglePinMeme,
@@ -46,15 +47,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     const resp = await fetch(imageUrl);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const blob = await resp.blob();
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
 
     const pageTitle = tab.title ?? "虎扑";
-    await saveMeme(imageUrl, dataUrl, pageTitle, "表情");
+    await saveMemeFromBlob(imageUrl, blob, pageTitle, "表情");
     notifyMemeChanged();
   } catch (err) {
     console.error("[Hupu Helper] Failed to save image:", err);
@@ -93,15 +88,36 @@ chrome.runtime.onMessage.addListener(
           sendResponse({ success: true, data: memes });
           break;
         }
-        case "SAVE_MEME_DATA": {
-          const { sourceUrl, dataUrl, pageTitle, name } = message as {
+        case "SAVE_MEME_DATA":
+        case "SAVE_MEME_BLOB": {
+          const { sourceUrl, pageTitle, name } = message as {
             type: string;
             sourceUrl: string;
-            dataUrl: string;
+            dataUrl?: string;
+            blob?: Blob;
             pageTitle?: string;
             name?: string;
           };
-          const saved = await saveMeme(sourceUrl, dataUrl, pageTitle, name);
+          let saved: import("./utils/storage").MemeImageData;
+          if (message.type === "SAVE_MEME_BLOB") {
+            const { blob } = message as {
+              type: string;
+              blob: Blob;
+              sourceUrl: string;
+              pageTitle?: string;
+              name?: string;
+            };
+            saved = await saveMemeFromBlob(sourceUrl, blob, pageTitle, name);
+          } else {
+            const { dataUrl } = message as {
+              type: string;
+              dataUrl: string;
+              sourceUrl: string;
+              pageTitle?: string;
+              name?: string;
+            };
+            saved = await saveMeme(sourceUrl, dataUrl, pageTitle, name);
+          }
           notifyMemeChanged();
           sendResponse({ success: true, data: saved });
           break;

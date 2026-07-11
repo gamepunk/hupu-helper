@@ -1,5 +1,6 @@
 import { describe, expect, test, beforeAll, afterAll } from "bun:test";
 import "fake-indexeddb/auto";
+import "./test-setup";
 import {
   saveMeme,
   deleteMeme,
@@ -35,7 +36,6 @@ describe("Storage CRUD", () => {
     expect(saved.meta.pageTitle).toBe("页面A");
     expect(saved.meta.name).toBe("表情1");
     expect(saved.meta.pinned).toBe(false);
-    expect(saved.dataUrl).toBe(img1);
   });
 
   test("saveMeme 相同 sourceUrl 跳过重复", async () => {

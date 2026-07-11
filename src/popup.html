@@ -163,6 +163,15 @@
         display: flex;
       }
 
+      .saved-item .pin-btn[data-pinned="true"] {
+        display: flex;
+        background: transparent;
+      }
+
+      .saved-item:hover .pin-btn[data-pinned="true"] {
+        background: rgba(0, 0, 0, 0.45);
+      }
+
       .saved-item .pin-btn:hover {
         background: rgba(0, 0, 0, 0.65);
       }

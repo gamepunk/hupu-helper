@@ -3,6 +3,40 @@
 //  容量上限：硬盘剩余空间的 ~50%（远超 chrome.storage 的 10MB）
 // ============================================================
 
+// ---------- 工具函数 ----------
+
+/** data URL → Blob */
+function dataURLToBlob(dataUrl: string): Blob {
+  const [meta, b64] = dataUrl.split(",");
+  const mimeType = meta.match(/:(.*?);/)?.[1] ?? "image/png";
+  const byteStr = atob(b64);
+  const bytes = new Uint8Array(byteStr.length);
+  for (let i = 0; i < byteStr.length; i++) bytes[i] = byteStr.charCodeAt(i);
+  return new Blob([bytes], { type: mimeType });
+}
+
+/** Blob → data URL（兼容 service worker 环境） */
+function blobToDataURL(blob: Blob): Promise<string> {
+  if (typeof FileReader !== "undefined") {
+    // Window 环境 — 使用 FileReader
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+  // Service worker 环境 — 使用 Response + btoa
+  return blob.arrayBuffer().then((buf) => {
+    const bytes = new Uint8Array(buf);
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return `data:${blob.type};base64,${btoa(binary)}`;
+  });
+}
+
 // ---------- 类型定义 ----------
 
 export interface SavedMeme {
@@ -40,16 +74,9 @@ function openDB(): Promise<IDBDatabase> {
     request.onupgradeneeded = () => {
       const db = request.result;
 
-      // 清理所有旧 store
-      for (const name of db.objectStoreNames) {
-        db.deleteObjectStore(name);
-      }
-
-      // memes store
       const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
       store.createIndex("savedAt", "savedAt", { unique: false });
-
-      // recent store（最近使用）
+      store.createIndex("sourceUrl", "sourceUrl", { unique: false });
       db.createObjectStore(RECENT_STORE, { keyPath: "key" });
     };
 
@@ -72,11 +99,11 @@ interface StoredMeme {
   pageTitle: string;
   savedAt: number;
   name: string;
-  dataUrl: string;
+  dataBlob: Blob;
   pinned: boolean;
 }
 
-/** EmojiImageData → StoredEmoji（展平） */
+/** MemeImageData → StoredMeme（展平 + 转 Blob） */
 function toStored(meme: MemeImageData): StoredMeme {
   return {
     id: meme.meta.id,
@@ -84,13 +111,13 @@ function toStored(meme: MemeImageData): StoredMeme {
     pageTitle: meme.meta.pageTitle,
     savedAt: meme.meta.savedAt,
     name: meme.meta.name,
-    dataUrl: meme.dataUrl,
+    dataBlob: dataURLToBlob(meme.dataUrl),
     pinned: meme.meta.pinned ?? false,
   };
 }
 
-/** StoredEmoji → EmojiImageData（还原嵌套） */
-function fromStored(stored: StoredMeme): MemeImageData {
+/** StoredMeme → MemeImageData（Blob → data URL） */
+async function fromStored(stored: StoredMeme): Promise<MemeImageData> {
   return {
     meta: {
       id: stored.id,
@@ -100,7 +127,7 @@ function fromStored(stored: StoredMeme): MemeImageData {
       name: stored.name,
       pinned: stored.pinned ?? false,
     },
-    dataUrl: stored.dataUrl,
+    dataUrl: await blobToDataURL(stored.dataBlob),
   };
 }
 
@@ -114,19 +141,33 @@ export async function getAllMemes(): Promise<MemeImageData[]> {
     const store = tx.objectStore(STORE_NAME);
     const index = store.index("savedAt");
     const request = index.openCursor(null, "prev");
-    const results: MemeImageData[] = [];
+    const stored: StoredMeme[] = [];
 
     request.onsuccess = () => {
       const cursor = request.result;
       if (cursor) {
-        results.push(fromStored(cursor.value as StoredMeme));
+        stored.push(cursor.value as StoredMeme);
         cursor.continue();
       } else {
-        resolve(results);
+        // 先收集所有记录（仅指针），再并行转换 Blob → dataUrl
+        resolve(Promise.all(stored.map(fromStored)));
       }
     };
     request.onerror = () => reject(request.error);
 
+    tx.oncomplete = () => db.close();
+  });
+}
+
+/** 获取已保存的表情包总数（无需读取 Blob） */
+async function getMemeCount(): Promise<number> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readonly");
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.count();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
     tx.oncomplete = () => db.close();
   });
 }
@@ -141,7 +182,7 @@ export async function saveMeme(
   const existing = await findBySourceUrl(sourceUrl);
   if (existing) return existing;
 
-  const all = await getAllMemes();
+  const count = await getMemeCount();
 
   const meme: MemeImageData = {
     meta: {
@@ -150,7 +191,7 @@ export async function saveMeme(
       pageTitle: pageTitle ?? document.title,
       savedAt: Date.now(),
       pinned: false,
-      name: name ?? `表情 ${all.length + 1}`,
+      name: name ?? `表情 ${count + 1}`,
     },
     dataUrl,
   };
@@ -168,6 +209,44 @@ export async function saveMeme(
   });
 }
 
+/** 直接保存 Blob（跳过 dataUrl 转换，性能优化） */
+export async function saveMemeFromBlob(
+  sourceUrl: string,
+  blob: Blob,
+  pageTitle?: string,
+  name?: string,
+): Promise<MemeImageData> {
+  const existing = await findBySourceUrl(sourceUrl);
+  if (existing) return existing;
+
+  const count = await getMemeCount();
+
+  const id = generateId();
+  const stored: StoredMeme = {
+    id,
+    sourceUrl,
+    pageTitle: pageTitle ?? document.title,
+    savedAt: Date.now(),
+    name: name ?? `表情 ${count + 1}`,
+    dataBlob: blob,
+    pinned: false,
+  };
+
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.put(stored);
+
+    request.onsuccess = () => {
+      fromStored(stored).then((meme) => resolve(meme));
+    };
+    request.onerror = () => reject(request.error);
+
+    tx.oncomplete = () => db.close();
+  });
+}
+
 /** 批量导入表情包（保留原始时间戳） */
 export async function importMemes(
   items: Array<{
@@ -179,13 +258,31 @@ export async function importMemes(
     pinned?: boolean;
   }>,
 ): Promise<number> {
-  const existing = await getAllMemes();
-  const existingUrls = new Set(existing.map((e) => e.meta.sourceUrl));
+  const existingUrls = new Set<string>();
+  // 从 IndexedDB 收集已存在的 sourceUrl（只读 key，不读 Blob）
+  const readDb = await openDB();
+  await new Promise<void>((resolve, reject) => {
+    const tx = readDb.transaction(STORE_NAME, "readonly");
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.openCursor();
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (cursor) {
+        existingUrls.add((cursor.value as StoredMeme).sourceUrl);
+        cursor.continue();
+      }
+    };
+    request.onerror = () => reject(request.error);
+    tx.oncomplete = () => {
+      readDb.close();
+      resolve();
+    };
+  });
   let imported = 0;
 
-  const db = await openDB();
+  const writeDb = await openDB();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite");
+    const tx = writeDb.transaction(STORE_NAME, "readwrite");
     const store = tx.objectStore(STORE_NAME);
 
     for (const item of items) {
@@ -210,7 +307,7 @@ export async function importMemes(
     }
 
     tx.oncomplete = () => {
-      db.close();
+      writeDb.close();
       resolve(imported);
     };
     tx.onerror = () => reject(tx.error);
@@ -333,10 +430,25 @@ export async function getRecentMemeIds(): Promise<string[]> {
 
 // ---------- 内部工具 ----------
 
-/** 根据 sourceUrl 查找是否已存在 */
+/** 根据 sourceUrl 查找是否已存在（使用索引，不读 Blob） */
 async function findBySourceUrl(
   sourceUrl: string,
 ): Promise<MemeImageData | null> {
-  const all = await getAllMemes();
-  return all.find((e) => e.meta.sourceUrl === sourceUrl) ?? null;
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readonly");
+    const store = tx.objectStore(STORE_NAME);
+    const index = store.index("sourceUrl");
+    const request = index.get(sourceUrl);
+    request.onsuccess = () => {
+      const stored = request.result as StoredMeme | undefined;
+      if (stored) {
+        fromStored(stored).then(resolve);
+      } else {
+        resolve(null);
+      }
+    };
+    request.onerror = () => reject(request.error);
+    tx.oncomplete = () => db.close();
+  });
 }
