@@ -95,6 +95,14 @@ bun run zip
 
 ## 更新日志
 
+### v1.0.3
+
+- 🗄️ Blob 存储迁移：图片以 Blob 格式存储，节省内存
+- ⚡ 性能优化：读取并行化、去重改用索引、备用路径直存 Blob
+- 🔧 Service Worker 兼容：`blobToDataURL` 支持无 `FileReader` 环境
+- ⭐ UI 改进：pinned 星星常亮显示，hover 出现背景色
+- 📍 星星位置：选择器和底部栏 pinned 标记移到左上角
+
 ### v1.0.2
 
 - 🏷️ 代码重构：全项目 "emoji" 统一重命名为 "meme"
