@@ -9,19 +9,19 @@
     <img src="https://img.shields.io/badge/Chrome%20Web%20Store-立即安装-4285F4?style=flat-square&logo=googlechrome&logoColor=white" alt="Chrome Web Store" />
   </a>
   <a href="https://github.com/gamepunk/hupu-helper/releases">
-    <img src="https://img.shields.io/github/v/release/gamepunk/hupu-helper?style=flat-square&color=dc2626&label=Release" alt="Release" />
+    <img src="https://img.shields.io/github/v/release/gamepunk/hupu-helper?style=flat-square&color=dc2626&label=发行版" alt="Release" />
   </a>
   <a href="https://github.com/gamepunk/hupu-helper/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/许可-MIT-3da639?style=flat-square" alt="MIT License" />
+    <img src="https://img.shields.io/badge/许可-MIT-3da639?style=flat-square" alt="License" />
   </a>
   <a href="https://github.com/gamepunk/hupu-helper/actions">
-    <img src="https://img.shields.io/badge/构建-passing-brightgreen?style=flat-square" alt="Build" />
+    <img src="https://img.shields.io/badge/构建-passing-brightgreen?style=flat-square&label=构建" alt="Build" />
   </a>
   <a href="https://bun.sh">
-    <img src="https://img.shields.io/badge/Bun-v1.3-000000?style=flat-square&logo=bun&logoColor=white" alt="Bun" />
+    <img src="https://img.shields.io/badge/Bun-v1.3-000000?style=flat-square&logo=bun&logoColor=white&label=运行时" alt="Bun" />
   </a>
   <a href="https://www.typescriptlang.org/">
-    <img src="https://img.shields.io/badge/TypeScript-v5.7-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/TypeScript-v5.7-3178C6?style=flat-square&logo=typescript&logoColor=white&label=语言" alt="TypeScript" />
   </a>
 </p>
 
