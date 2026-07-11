@@ -166,6 +166,53 @@ export async function saveEmoji(
   });
 }
 
+/** 批量导入表情包（保留原始时间戳） */
+export async function importEmojis(
+  items: Array<{
+    sourceUrl: string;
+    dataUrl: string;
+    pageTitle?: string;
+    name?: string;
+    savedAt?: number;
+  }>,
+): Promise<number> {
+  const existing = await getAllEmojis();
+  const existingUrls = new Set(existing.map((e) => e.meta.sourceUrl));
+  let imported = 0;
+
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+
+    for (const item of items) {
+      if (!item.dataUrl || !item.sourceUrl || existingUrls.has(item.sourceUrl))
+        continue;
+
+      const emoji: EmojiImageData = {
+        meta: {
+          id: generateId(),
+          sourceUrl: item.sourceUrl,
+          pageTitle: item.pageTitle ?? "",
+          savedAt: item.savedAt ?? Date.now(),
+          name: item.name ?? "表情",
+        },
+        dataUrl: item.dataUrl,
+      };
+
+      store.put(toStored(emoji));
+      existingUrls.add(item.sourceUrl);
+      imported++;
+    }
+
+    tx.oncomplete = () => {
+      db.close();
+      resolve(imported);
+    };
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
 /** 删除一个表情包 */
 export async function deleteEmoji(id: string): Promise<void> {
   const db = await openDB();

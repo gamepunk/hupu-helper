@@ -13,11 +13,17 @@ import {
 const CONTEXT_MENU_ID = "hupu-save-emoji";
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: CONTEXT_MENU_ID,
-    title: "保存为表情包",
-    contexts: ["image"],
-    documentUrlPatterns: ["*://bbs.hupu.com/*"],
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: CONTEXT_MENU_ID,
+      title: "保存为表情包",
+      contexts: ["image"],
+      documentUrlPatterns: [
+        "*://bbs.hupu.com/*",
+        "*://*.bbsactivity.hupu.com/*",
+        "*://m.hupu.com/*",
+      ],
+    });
   });
 });
 
@@ -62,7 +68,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 // ---------- 通知所有虎扑标签页刷新 ----------
 
 async function notifyEmojiChanged(): Promise<void> {
-  const tabs = await chrome.tabs.query({ url: "*://bbs.hupu.com/*" });
+  const tabs = await chrome.tabs.query({
+    url: ["*://bbs.hupu.com/*", "*://*.bbsactivity.hupu.com/*"],
+  });
   for (const tab of tabs) {
     if (tab.id) {
       chrome.tabs

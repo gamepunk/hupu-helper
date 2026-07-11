@@ -495,36 +495,74 @@ function renderPicker(
 
   picker.innerHTML = header + body;
 
-  // 面板样式（虎捕原生风格）
+  // 面板样式 — 气泡弹出
   picker.style.cssText = `
     position:fixed !important;
     z-index:999999 !important;
     width:440px !important;
     background:#fff !important;
-    border-radius:0 !important;
+    border-radius:8px !important;
     box-shadow:0 4px 20px rgba(0,0,0,0.12) !important;
-    border:1px solid #e8e8e8 !important;
+    border:1px solid #e0e0e0 !important;
     font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif !important;
     animation:hupuPickerIn 0.15s ease !important;
   `;
+
+  // 气泡箭头（用纯 CSS 三角形，指向按钮方向）
+  const arrow = document.createElement("div");
+  arrow.style.cssText = `
+    position:fixed !important;
+    z-index:999999 !important;
+    width:0 !important;height:0 !important;
+    border-left:7px solid transparent !important;
+    border-right:7px solid transparent !important;
+    border-top:7px solid #fff !important;
+    pointer-events:none !important;
+  `;
+  arrow.id = "hupu-picker-arrow";
 
   // 定位：按钮正上方弹出
   const toolbarBtn = document.querySelector(`.${PICKER_BTN_CLASS}`);
   if (toolbarBtn) {
     const rect = toolbarBtn.getBoundingClientRect();
-    picker.style.left = `${Math.max(4, Math.min(rect.left + rect.width / 2 - 220, window.innerWidth - 444))}px`;
-    picker.style.bottom = `${window.innerHeight - rect.top + 4}px`;
+    const pickerW = 440;
+    const arrowH = 7; // 箭头高度
+
+    // picker 水平居中于按钮
+    let left = Math.max(
+      4,
+      Math.min(
+        rect.left + rect.width / 2 - pickerW / 2,
+        window.innerWidth - pickerW - 4,
+      ),
+    );
+    const pickerBottom = window.innerHeight - rect.top + arrowH + 4;
+    picker.style.left = `${left}px`;
+    picker.style.bottom = `${pickerBottom}px`;
+
+    // 箭头在按钮正上方（指向按钮）
+    const arrowLeft = rect.left + rect.width / 2 - 7;
+    arrow.style.left = `${Math.max(10, Math.min(arrowLeft, window.innerWidth - 20))}px`;
+    arrow.style.bottom = `${window.innerHeight - rect.top - 2}px`;
   } else {
     picker.style.right = "12px";
     picker.style.bottom = "120px";
+    arrow.style.display = "none";
   }
 
   document.body.appendChild(picker);
+  document.body.appendChild(arrow);
 
   // 关闭
+  const removePicker = () => {
+    picker.remove();
+    const arr = document.getElementById("hupu-picker-arrow");
+    if (arr) arr.remove();
+  };
+
   picker
     .querySelector("#hupu-picker-close")
-    ?.addEventListener("click", () => picker.remove());
+    ?.addEventListener("click", () => removePicker());
   picker
     .querySelector("#hupu-picker-close")
     ?.addEventListener("mouseenter", () => {
@@ -542,13 +580,13 @@ function renderPicker(
   setTimeout(() => {
     const closeOnClick = (ev: MouseEvent) => {
       if (!picker.contains(ev.target as Node)) {
-        picker.remove();
+        removePicker();
         document.removeEventListener("mousedown", closeOnClick);
         window.removeEventListener("scroll", closeOnScroll);
       }
     };
     const closeOnScroll = () => {
-      picker.remove();
+      removePicker();
       document.removeEventListener("mousedown", closeOnClick);
       window.removeEventListener("scroll", closeOnScroll);
     };
@@ -569,7 +607,7 @@ function renderPicker(
       const id = (el as HTMLElement).dataset.id;
       const emoji = emojis.find((e) => e.meta.id === id);
       if (emoji) {
-        picker.remove();
+        removePicker();
         saveRecentToBackground(emoji.meta.id);
         await uploadEmojiToHupu(emoji);
       }
@@ -753,6 +791,8 @@ function refreshRecentRow(): void {
       getRecentIdsFromBackground(),
     ]).then(([emojis, recentIds]) => {
       picker.remove();
+      const arr = document.getElementById("hupu-picker-arrow");
+      if (arr) arr.remove();
       renderPicker(emojis, recentIds);
     });
   }
