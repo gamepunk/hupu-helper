@@ -143,6 +143,36 @@
         display: block;
       }
 
+      .saved-item .pin-btn {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        width: 22px;
+        height: 22px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1;
+        background: rgba(0, 0, 0, 0.45);
+        border-radius: 4px;
+        transition: background 0.15s;
+      }
+
+      .saved-item:hover .pin-btn {
+        display: flex;
+      }
+
+      .saved-item .pin-btn:hover {
+        background: rgba(0, 0, 0, 0.65);
+      }
+
+      .saved-item .pin-btn svg {
+        width: 14px;
+        height: 14px;
+        display: block;
+      }
+
       .saved-item .del-btn {
         position: absolute;
         top: 4px;

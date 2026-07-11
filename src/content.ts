@@ -1,15 +1,7 @@
 /// <reference types="chrome" />
 
-interface EmojiImageData {
-  meta: {
-    id: string;
-    sourceUrl: string;
-    pageTitle: string;
-    savedAt: number;
-    name: string;
-  };
-  dataUrl: string;
-}
+// 从 storage 导入类型（避免重复定义）
+import type { MemeImageData } from "./utils/storage";
 
 // ============================================================
 //  Hupu Helper - Content Script
@@ -26,10 +18,10 @@ const PICKER_BTN_CLASS = "hupu-helper-picker-btn";
 // ---------- 通过 Background 读写数据 ----------
 
 /** 向 background 请求所有已保存的表情包 */
-function requestEmojisFromBackground(): Promise<EmojiImageData[]> {
+function requestMemesFromBackground(): Promise<MemeImageData[]> {
   return new Promise((resolve) => {
-    chrome.runtime.sendMessage({ type: "GET_SAVED_EMOJIS" }, (response) => {
-      resolve((response?.data as EmojiImageData[]) ?? []);
+    chrome.runtime.sendMessage({ type: "GET_SAVED_MEMES" }, (response) => {
+      resolve((response?.data as MemeImageData[]) ?? []);
     });
   });
 }
@@ -45,7 +37,7 @@ function getRecentIdsFromBackground(): Promise<string[]> {
 
 /** 通过 background 记录最近使用 */
 function saveRecentToBackground(id: string): void {
-  chrome.runtime.sendMessage({ type: "SAVE_RECENT_EMOJI", id });
+  chrome.runtime.sendMessage({ type: "SAVE_RECENT_MEME", id });
 }
 
 /** 保存图片到 storage */
@@ -69,7 +61,7 @@ async function handleSaveImage(imageUrl: string): Promise<void> {
     // 发送到 background 保存
     chrome.runtime.sendMessage(
       {
-        type: "SAVE_EMOJI_DATA",
+        type: "SAVE_MEME_DATA",
         sourceUrl: imageUrl,
         dataUrl,
         pageTitle: document.title,
@@ -121,10 +113,10 @@ function blobToDataURL(blob: Blob): Promise<string> {
 // ============================================================
 
 /** 注入表情选择器 — 在虎捕工具栏添加表情按钮 */
-function initEmojiPicker(): void {
+function initMemePicker(): void {
   injectUploadScript();
   watchFileInput();
-  injectToolbarEmojiButton();
+  injectToolbarMemeButton();
 }
 
 /** 监视页面中动态创建的 file input */
@@ -142,9 +134,9 @@ function watchFileInput(): void {
 }
 
 /** 在虎捕评论区注入表情按钮 + 最近使用表情行 */
-function injectToolbarEmojiButton(): void {
+function injectToolbarMemeButton(): void {
   const tryAll = () => {
-    tryInjectEmojiButton();
+    tryInjectMemeButton();
     tryInjectRecentRow();
   };
 
@@ -152,22 +144,12 @@ function injectToolbarEmojiButton(): void {
 
   const observer = new MutationObserver(() => tryAll());
   observer.observe(document.body, { childList: true, subtree: true });
-
-  let attempts = 0;
-  const interval = setInterval(() => {
-    if (attempts > 30) {
-      clearInterval(interval);
-      return;
-    }
-    tryAll();
-    attempts++;
-  }, 1000);
 }
 
-function tryInjectEmojiButton(): void {
+function tryInjectMemeButton(): void {
   if (document.querySelector(`.${PICKER_BTN_CLASS}`)) return;
   const container = findToolbarContainer();
-  if (container) appendEmojiButton(container);
+  if (container) appendMemeButton(container);
 }
 
 /** 在「还可以添加N张图片」前面插入最近使用表情行（同一行左对齐） */
@@ -182,7 +164,7 @@ function tryInjectRecentRow(): void {
   if (!actionsBar) return;
 
   recentRowInjecting = true;
-  requestEmojisFromBackground().then((all) => {
+  requestMemesFromBackground().then((all) => {
     if (all.length === 0 || document.querySelector(".hupu-recent-row")) {
       recentRowInjecting = false;
       return;
@@ -200,7 +182,13 @@ function tryInjectRecentRow(): void {
       margin-right:auto !important;
     `;
 
-    all.slice(0, 10).forEach((emoji) => {
+    // 置顶优先，最多取 10 个
+    const sorted = [...all].sort((a, b) => {
+      if (a.meta.pinned && !b.meta.pinned) return -1;
+      if (!a.meta.pinned && b.meta.pinned) return 1;
+      return 0;
+    });
+    sorted.slice(0, 10).forEach((meme) => {
       const item = document.createElement("span");
       item.style.cssText = `
         display:inline-flex !important;
@@ -209,16 +197,26 @@ function tryInjectRecentRow(): void {
         width:36px !important;height:36px !important;
         border-radius:0 !important;
         background:#f5f5f5 !important;
-        border:1px solid #e8e8e8 !important;
+        position:relative !important;
+        border:1px solid ${meme.meta.pinned ? "#fadb14" : "#e8e8e8"} !important;
         cursor:pointer !important;
         overflow:hidden !important;
         transition:border-color 0.12s, transform 0.12s !important;
         flex-shrink:0 !important;
       `;
-      item.title = emoji.meta.name;
+      item.title = meme.meta.pinned ? `📌 ${meme.meta.name}` : meme.meta.name;
+
+      if (meme.meta.pinned) {
+        const pin = document.createElement("span");
+        pin.innerHTML =
+          '<svg width="10" height="10" viewBox="0 0 24 24" fill="#fadb14" stroke="#fadb14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+        pin.style.cssText =
+          "position:absolute !important;top:1px !important;right:1px !important;z-index:2 !important;line-height:0 !important;pointer-events:none !important;";
+        item.appendChild(pin);
+      }
 
       const img = document.createElement("img");
-      img.src = emoji.dataUrl;
+      img.src = meme.dataUrl;
       img.style.cssText = `
         width:35px !important;height:35px !important;
         object-fit:cover !important;display:block !important;
@@ -232,13 +230,13 @@ function tryInjectRecentRow(): void {
         item.style.transform = "scale(1.15)";
       });
       item.addEventListener("mouseleave", () => {
-        item.style.borderColor = "#e8e8e8";
+        item.style.borderColor = meme.meta.pinned ? "#fadb14" : "#e8e8e8";
         item.style.transform = "scale(1)";
       });
       item.addEventListener("click", (e) => {
         e.stopPropagation();
-        saveRecentToBackground(emoji.meta.id);
-        uploadEmojiToHupu(emoji);
+        saveRecentToBackground(meme.meta.id);
+        uploadMemeToHupu(meme);
       });
       row.appendChild(item);
     });
@@ -295,7 +293,7 @@ function findToolbarContainer(): HTMLElement | null {
 }
 
 /** 在工具栏容器中追加表情按钮 */
-function appendEmojiButton(container: HTMLElement): void {
+function appendMemeButton(container: HTMLElement): void {
   if (container.querySelector(`.${PICKER_BTN_CLASS}`)) return;
 
   // 匹配虎扑「图片」按钮的样式结构
@@ -367,18 +365,15 @@ async function togglePicker(): Promise<void> {
   }
 
   // 加载已保存的表情包 + 最近使用
-  const [emojis, recentIds] = await Promise.all([
-    requestEmojisFromBackground(),
+  const [memes, recentIds] = await Promise.all([
+    requestMemesFromBackground(),
     getRecentIdsFromBackground(),
   ]);
-  renderPicker(emojis, recentIds);
+  renderPicker(memes, recentIds);
 }
 
 /** 渲染表情选择器面板 — 虎捕原生风格 */
-function renderPicker(
-  emojis: EmojiImageData[],
-  recentIds: string[] = [],
-): void {
+function renderPicker(memes: MemeImageData[], recentIds: string[] = []): void {
   // 注入公共样式
   if (!document.getElementById("hupu-picker-style")) {
     const s = document.createElement("style");
@@ -395,7 +390,7 @@ function renderPicker(
   const picker = document.createElement("div");
   picker.id = PICKER_CONTAINER_ID;
 
-  const count = emojis.length;
+  const count = memes.length;
   const hasRecent = recentIds.length > 0;
 
   // 头部：标题 + 关闭
@@ -428,17 +423,17 @@ function renderPicker(
     `;
   } else {
     const recentLabel = hasRecent
-      ? `<div style="font-size:11px;color:#bbb;padding:2px 12px 4px;">最近使用 ${recentIds.filter((rid) => emojis.some((s) => s.meta.id === rid)).length}</div>
+      ? `<div style="font-size:11px;color:#bbb;padding:2px 12px 4px;">最近使用 ${recentIds.filter((rid) => memes.some((s) => s.meta.id === rid)).length}</div>
          <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:6px;padding:0 12px 8px;">
          ${(() => {
            const cols = 10;
            const validRecent = recentIds.filter((rid) =>
-             emojis.some((s) => s.meta.id === rid),
+             memes.some((s) => s.meta.id === rid),
            );
            const items = validRecent.map((rid) => {
-             const e = emojis.find((s) => s.meta.id === rid);
+             const e = memes.find((s) => s.meta.id === rid);
              return e
-               ? `<div class="hupu-picker-emoji" data-id="${e.meta.id}"
+               ? `<div class="hupu-picker-meme" data-id="${e.meta.id}"
                      style="width:36px;height:36px;border-radius:0;overflow:hidden;cursor:pointer;background:#f7f7f7;border:1px solid #e8e8e8;position:relative;transition:transform 0.12s;">
                      <img src="${e.dataUrl}" alt="" style="width:35px;height:35px;object-fit:cover;display:block;" loading="lazy" />
                    </div>`
@@ -453,7 +448,7 @@ function renderPicker(
            return items.join("");
          })()}
          </div>
-         <div style="font-size:11px;color:#e0e0e0;border-top:1px solid #f0f0f0;padding:6px 12px 2px;">所有表情 ${emojis.length}</div>`
+         <div style="font-size:11px;color:#e0e0e0;border-top:1px solid #f0f0f0;padding:6px 12px 2px;">所有表情 ${memes.length}</div>`
       : "";
 
     body =
@@ -465,23 +460,31 @@ function renderPicker(
       ">
         ${(() => {
           const cols = 10;
-          const items = emojis.map(
+          // 置顶在前，其余在后
+          const sorted = [...memes].sort((a, b) => {
+            if (a.meta.pinned && !b.meta.pinned) return -1;
+            if (!a.meta.pinned && b.meta.pinned) return 1;
+            return 0;
+          });
+          const items = sorted.map(
             (e) => `
-          <div class="hupu-picker-emoji" data-id="${e.meta.id}"
+          <div class="hupu-picker-meme" data-id="${e.meta.id}"
             style="
               width:36px;height:36px;border-radius:0;overflow:hidden;
               cursor:pointer;background:#f7f7f7;
-              border:1px solid #e8e8e8;
+              border:1px solid ${e.meta.pinned ? "#fadb14" : "#e8e8e8"};
               position:relative;transition:transform 0.12s;
             "
+            title="${e.meta.pinned ? "已置顶" : ""}"
           >
+            ${e.meta.pinned ? '<svg style="position:absolute;top:1px;right:1px;z-index:1;" width="10" height="10" viewBox="0 0 24 24" fill="#fadb14" stroke="#fadb14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' : ""}
             <img src="${e.dataUrl}" alt="" style="
               width:35px;height:35px;object-fit:cover;display:block;
             " loading="lazy" />
           </div>
         `,
           );
-          const empty = cols - (emojis.length % cols || cols);
+          const empty = cols - (sorted.length % cols || cols);
           for (let i = 0; i < empty; i++) {
             items.push(
               `<div style="width:36px;height:36px;border-radius:0;background:transparent;"></div>`,
@@ -570,7 +573,7 @@ function renderPicker(
   }, 0);
 
   // 表情交互
-  picker.querySelectorAll(".hupu-picker-emoji").forEach((el) => {
+  picker.querySelectorAll(".hupu-picker-meme").forEach((el) => {
     el.addEventListener("mouseenter", () => {
       (el as HTMLElement).style.transform = "scale(1.06)";
     });
@@ -580,11 +583,11 @@ function renderPicker(
 
     el.addEventListener("click", async () => {
       const id = (el as HTMLElement).dataset.id;
-      const emoji = emojis.find((e) => e.meta.id === id);
-      if (emoji) {
+      const meme = memes.find((e) => e.meta.id === id);
+      if (meme) {
         removePicker();
-        saveRecentToBackground(emoji.meta.id);
-        await uploadEmojiToHupu(emoji);
+        saveRecentToBackground(meme.meta.id);
+        await uploadMemeToHupu(meme);
       }
     });
   });
@@ -595,10 +598,10 @@ function renderPicker(
 // ============================================================
 
 /** 将保存的表情上传至虎扑 */
-async function uploadEmojiToHupu(emoji: EmojiImageData): Promise<void> {
+async function uploadMemeToHupu(meme: MemeImageData): Promise<void> {
   try {
     // 转换 data URL 为 File
-    const file = dataURLToFile(emoji.dataUrl, `emoji_${emoji.meta.id}.png`);
+    const file = dataURLToFile(meme.dataUrl, `meme_${meme.meta.id}.png`);
 
     // 使用 MutationObserver 缓存的 file input
     const fileInput = detectedFileInput || findHupuFileInput();
@@ -719,7 +722,7 @@ function injectUploadScript(): void {
 
   const script = document.createElement("script");
   script.setAttribute("data-hupu-helper", "uploader");
-  script.src = chrome.runtime.getURL("upload-helper.js");
+  script.src = chrome.runtime.getURL("meme-upload.js");
   document.documentElement.appendChild(script);
   script.onload = () => script.remove();
 }
@@ -730,13 +733,13 @@ function injectUploadScript(): void {
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   switch (message.type) {
-    case "SAVE_IMAGE_EMOJI": {
+    case "SAVE_IMAGE_MEME": {
       const { imageUrl } = message as { type: string; imageUrl: string };
       handleSaveImage(imageUrl);
       sendResponse({ success: true });
       break;
     }
-    case "UPLOAD_EMOJI_FILE": {
+    case "UPLOAD_MEME_FILE": {
       const { dataUrl } = message as { type: string; dataUrl: string };
       window.dispatchEvent(
         new CustomEvent("hupu-helper:upload-file", {
@@ -746,7 +749,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       sendResponse({ success: true });
       break;
     }
-    case "EMOJI_DATA_CHANGED": {
+    case "MEME_DATA_CHANGED": {
       // 表情数据有变动，刷新底部栏
       refreshRecentRow();
       sendResponse({ success: true });
@@ -762,11 +765,11 @@ function refreshRecentRow(): void {
   const picker = document.getElementById(PICKER_CONTAINER_ID);
   if (picker) {
     Promise.all([
-      requestEmojisFromBackground(),
+      requestMemesFromBackground(),
       getRecentIdsFromBackground(),
-    ]).then(([emojis, recentIds]) => {
+    ]).then(([memes, recentIds]) => {
       picker.remove();
-      renderPicker(emojis, recentIds);
+      renderPicker(memes, recentIds);
     });
   }
 
@@ -776,7 +779,7 @@ function refreshRecentRow(): void {
   const oldBtn = document.querySelector(`.${PICKER_BTN_CLASS}`);
   if (oldBtn) oldBtn.remove();
   recentRowInjecting = false;
-  injectToolbarEmojiButton();
+  injectToolbarMemeButton();
 }
 
 // ============================================================
@@ -787,7 +790,7 @@ function init(): void {
   console.log("[Hupu Helper] Content script loaded ✅");
 
   // 注入悬浮按钮 + 表情选择器
-  initEmojiPicker();
+  initMemePicker();
 }
 
 // DOM 就绪后启动

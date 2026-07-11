@@ -35,7 +35,7 @@
   "homepage_url": "https://github.com/gamepunk/hupu-helper",
   "web_accessible_resources": [
     {
-      "resources": ["upload-helper.js"],
+      "resources": ["meme-upload.js"],
       "matches": ["*://bbs.hupu.com/*", "*://*.bbsactivity.hupu.com/*"]
     }
   ],

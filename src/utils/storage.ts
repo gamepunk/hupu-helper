@@ -5,7 +5,7 @@
 
 // ---------- 类型定义 ----------
 
-export interface SavedEmoji {
+export interface SavedMeme {
   /** 唯一标识 */
   id: string;
   /** 原始图片 URL（来源页面） */
@@ -16,17 +16,19 @@ export interface SavedEmoji {
   savedAt: number;
   /** 可选的自定义名称 */
   name: string;
+  /** 是否置顶 */
+  pinned: boolean;
 }
 
-export interface EmojiImageData {
-  meta: SavedEmoji;
+export interface MemeImageData {
+  meta: SavedMeme;
   /** base64 编码的图片数据 (data:image/...) */
   dataUrl: string;
 }
 
 const DB_NAME = "hupu-helper";
-const DB_VERSION = 3;
-const STORE_NAME = "emojis";
+const DB_VERSION = 1;
+const STORE_NAME = "memes";
 const RECENT_STORE = "recent";
 
 // ---------- 数据库初始化 ----------
@@ -38,21 +40,17 @@ function openDB(): Promise<IDBDatabase> {
     request.onupgradeneeded = () => {
       const db = request.result;
 
-      // 清理旧版 store（v1→v2 时创建的错误结构）
-      if (db.objectStoreNames.contains("emojis_v1")) {
-        db.deleteObjectStore("emojis_v1");
+      // 清理所有旧 store
+      for (const name of db.objectStoreNames) {
+        db.deleteObjectStore(name);
       }
 
-      // emojis store
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
-        store.createIndex("savedAt", "savedAt", { unique: false });
-      }
+      // memes store
+      const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
+      store.createIndex("savedAt", "savedAt", { unique: false });
 
       // recent store（最近使用）
-      if (!db.objectStoreNames.contains(RECENT_STORE)) {
-        db.createObjectStore(RECENT_STORE, { keyPath: "key" });
-      }
+      db.createObjectStore(RECENT_STORE, { keyPath: "key" });
     };
 
     request.onsuccess = () => resolve(request.result);
@@ -68,29 +66,31 @@ function generateId(): string {
 
 // ---------- 扁平存储类型（IndexedDB 要求 keyPath 在顶层） ----------
 
-interface StoredEmoji {
+interface StoredMeme {
   id: string;
   sourceUrl: string;
   pageTitle: string;
   savedAt: number;
   name: string;
   dataUrl: string;
+  pinned: boolean;
 }
 
 /** EmojiImageData → StoredEmoji（展平） */
-function toStored(emoji: EmojiImageData): StoredEmoji {
+function toStored(meme: MemeImageData): StoredMeme {
   return {
-    id: emoji.meta.id,
-    sourceUrl: emoji.meta.sourceUrl,
-    pageTitle: emoji.meta.pageTitle,
-    savedAt: emoji.meta.savedAt,
-    name: emoji.meta.name,
-    dataUrl: emoji.dataUrl,
+    id: meme.meta.id,
+    sourceUrl: meme.meta.sourceUrl,
+    pageTitle: meme.meta.pageTitle,
+    savedAt: meme.meta.savedAt,
+    name: meme.meta.name,
+    dataUrl: meme.dataUrl,
+    pinned: meme.meta.pinned ?? false,
   };
 }
 
 /** StoredEmoji → EmojiImageData（还原嵌套） */
-function fromStored(stored: StoredEmoji): EmojiImageData {
+function fromStored(stored: StoredMeme): MemeImageData {
   return {
     meta: {
       id: stored.id,
@@ -98,6 +98,7 @@ function fromStored(stored: StoredEmoji): EmojiImageData {
       pageTitle: stored.pageTitle,
       savedAt: stored.savedAt,
       name: stored.name,
+      pinned: stored.pinned ?? false,
     },
     dataUrl: stored.dataUrl,
   };
@@ -106,19 +107,19 @@ function fromStored(stored: StoredEmoji): EmojiImageData {
 // ---------- CRUD 操作 ----------
 
 /** 获取所有已保存的表情包（按保存时间倒序） */
-export async function getAllEmojis(): Promise<EmojiImageData[]> {
+export async function getAllMemes(): Promise<MemeImageData[]> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readonly");
     const store = tx.objectStore(STORE_NAME);
     const index = store.index("savedAt");
     const request = index.openCursor(null, "prev");
-    const results: EmojiImageData[] = [];
+    const results: MemeImageData[] = [];
 
     request.onsuccess = () => {
       const cursor = request.result;
       if (cursor) {
-        results.push(fromStored(cursor.value as StoredEmoji));
+        results.push(fromStored(cursor.value as StoredMeme));
         cursor.continue();
       } else {
         resolve(results);
@@ -131,23 +132,24 @@ export async function getAllEmojis(): Promise<EmojiImageData[]> {
 }
 
 /** 保存一个新表情包（已存在相同 sourceUrl 则跳过） */
-export async function saveEmoji(
+export async function saveMeme(
   sourceUrl: string,
   dataUrl: string,
   pageTitle?: string,
   name?: string,
-): Promise<EmojiImageData> {
+): Promise<MemeImageData> {
   const existing = await findBySourceUrl(sourceUrl);
   if (existing) return existing;
 
-  const all = await getAllEmojis();
+  const all = await getAllMemes();
 
-  const emoji: EmojiImageData = {
+  const meme: MemeImageData = {
     meta: {
       id: generateId(),
       sourceUrl,
       pageTitle: pageTitle ?? document.title,
       savedAt: Date.now(),
+      pinned: false,
       name: name ?? `表情 ${all.length + 1}`,
     },
     dataUrl,
@@ -157,9 +159,9 @@ export async function saveEmoji(
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
     const store = tx.objectStore(STORE_NAME);
-    const request = store.put(toStored(emoji));
+    const request = store.put(toStored(meme));
 
-    request.onsuccess = () => resolve(emoji);
+    request.onsuccess = () => resolve(meme);
     request.onerror = () => reject(request.error);
 
     tx.oncomplete = () => db.close();
@@ -167,16 +169,17 @@ export async function saveEmoji(
 }
 
 /** 批量导入表情包（保留原始时间戳） */
-export async function importEmojis(
+export async function importMemes(
   items: Array<{
     sourceUrl: string;
     dataUrl: string;
     pageTitle?: string;
     name?: string;
     savedAt?: number;
+    pinned?: boolean;
   }>,
 ): Promise<number> {
-  const existing = await getAllEmojis();
+  const existing = await getAllMemes();
   const existingUrls = new Set(existing.map((e) => e.meta.sourceUrl));
   let imported = 0;
 
@@ -189,18 +192,19 @@ export async function importEmojis(
       if (!item.dataUrl || !item.sourceUrl || existingUrls.has(item.sourceUrl))
         continue;
 
-      const emoji: EmojiImageData = {
+      const meme: MemeImageData = {
         meta: {
           id: generateId(),
           sourceUrl: item.sourceUrl,
           pageTitle: item.pageTitle ?? "",
           savedAt: item.savedAt ?? Date.now(),
           name: item.name ?? "表情",
+          pinned: item.pinned ?? false,
         },
         dataUrl: item.dataUrl,
       };
 
-      store.put(toStored(emoji));
+      store.put(toStored(meme));
       existingUrls.add(item.sourceUrl);
       imported++;
     }
@@ -214,7 +218,7 @@ export async function importEmojis(
 }
 
 /** 删除一个表情包 */
-export async function deleteEmoji(id: string): Promise<void> {
+export async function deleteMeme(id: string): Promise<void> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
@@ -228,8 +232,8 @@ export async function deleteEmoji(id: string): Promise<void> {
   });
 }
 
-/** 更新表情包名称 */
-export async function updateEmojiName(id: string, name: string): Promise<void> {
+/** 切换置顶状态 */
+export async function togglePinMeme(id: string): Promise<boolean> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
@@ -237,7 +241,31 @@ export async function updateEmojiName(id: string, name: string): Promise<void> {
     const request = store.get(id);
 
     request.onsuccess = () => {
-      const data = request.result as StoredEmoji | undefined;
+      const data = request.result as StoredMeme | undefined;
+      if (data) {
+        data.pinned = !data.pinned;
+        store.put(data);
+        resolve(data.pinned);
+      } else {
+        resolve(false);
+      }
+    };
+    request.onerror = () => reject(request.error);
+
+    tx.oncomplete = () => db.close();
+  });
+}
+
+/** 更新表情包名称 */
+export async function updateMemeName(id: string, name: string): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.get(id);
+
+    request.onsuccess = () => {
+      const data = request.result as StoredMeme | undefined;
       if (data) {
         data.name = name;
         store.put(data);
@@ -256,7 +284,7 @@ const RECENT_KEY = "recent_ids";
 const MAX_RECENT = 9;
 
 /** 记录一个表情包为最近使用 */
-export async function saveRecentEmoji(id: string): Promise<void> {
+export async function saveRecentMeme(id: string): Promise<void> {
   const db = await openDB();
   const tx = db.transaction(RECENT_STORE, "readwrite");
   const store = tx.objectStore(RECENT_STORE);
@@ -285,7 +313,7 @@ export async function saveRecentEmoji(id: string): Promise<void> {
 }
 
 /** 获取最近使用的表情包 ID 列表（按最近优先） */
-export async function getRecentEmojiIds(): Promise<string[]> {
+export async function getRecentMemeIds(): Promise<string[]> {
   const db = await openDB();
   return new Promise((resolve) => {
     const tx = db.transaction(RECENT_STORE, "readonly");
@@ -308,7 +336,7 @@ export async function getRecentEmojiIds(): Promise<string[]> {
 /** 根据 sourceUrl 查找是否已存在 */
 async function findBySourceUrl(
   sourceUrl: string,
-): Promise<EmojiImageData | null> {
-  const all = await getAllEmojis();
+): Promise<MemeImageData | null> {
+  const all = await getAllMemes();
   return all.find((e) => e.meta.sourceUrl === sourceUrl) ?? null;
 }
